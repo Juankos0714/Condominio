@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Octava Vecindad</title>
+    <link rel="stylesheet" href="./styles/style.css">
+    <style>
+        /* Added styles for the table and detail display */
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #resultados { margin-top: 20px; }
+        #resultados pre { white-space: pre-wrap; word-wrap: break-word; } /* For long detail texts */
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 8px; box-sizing: border-box; }
+        .action-container { display: flex; justify-content: space-between; margin-top: 20px; }
+        .action-container button { padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="./images/logo.PNG" alt="">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" id="inicio-link" class="active">Inicio</a></li>
+                <li><a href="#" id="administrar-link" >Administrar</a></li>
+                <li><a href="#" id="base-datos-link">Base de datos</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="">
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content" id="content-area">
+            <div class="title">
+                <div class="subtitle">La Octava</div>
+                <div class="main-title">Vecindad</div>
+            </div>
+            
+            <a href="#" class="button" id="action-button" onclick="main()">Administrar</a>
+
+            
+            <div class="family-image">
+                <img src="./images/feliz.jpg" alt="Familia feliz">
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="motto">La transparencia es nuestra principal arma</div>
+            
+            <div class="chart">
+                <div class="chart-line"></div>
+                <img src="./images/Captura.PNG" alt="">
+            </div>
+            
+            <a href="#" class="button">Finanzas</a>
+        </div>
+    </div>
+
+    <div id="modal" style="display:none; position:fixed; z-index:1; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.4);">
+        <div id="modal-content" style="background-color:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:80%;">
+            <span id="modal-close" style="color:#aaa; float:right; font-size:28px; font-weight:bold; cursor:pointer;">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <script>
+          const COSTO_PISCINA_POR_ADULTO = 2000;
+  const COSTO_JUEGOS = 5000;
+  const COSTO_ZONAS_SOCIALES = 10000;
+  const COSTO_ASEO = 15000;
+  const PORCENTAJE_DESCUENTO = 0.20;
+  const COSTO_FIJO = 50000;
+
+  let apartamentos = [];
+
+  function Apartamento(numero, dueno, inquilino, numAdultos, numNinos) {
+    this.numero = numero;
+    this.dueno = dueno;
+    this.inquilino = inquilino;
+    this.numAdultos = numAdultos;
+    this.numNinos = numNinos;
+    this.costoPiscina = 0;
+    this.costoJuegos = 0;
+    this.costoZonasSociales = 0;
+    this.costoAseo = 0;
+    this.subtotal = 0;
+    this.descuento = 0;
+    this.totalPagar = 0;
+  }
+
+  function crearDatosIniciales() {
+    const opcion = prompt("¿Cómo desea crear los datos?\n1. Usar datos predefinidos\n2. Ingresar datos manualmente");
+
+    if (opcion === '1' || opcion === null) {
+      apartamentos = [
+        new Apartamento("102", "María", "Ana", 2, 2),
+        new Apartamento("303", "José", "José", 3, 2),
+        new Apartamento("202", "Jesús", "Beto", 1, 0),
+        new Apartamento("203", "David", "Carlos", 4, 0),
+        new Apartamento("302", "Daniel", "Daniel", 3, 0),
+        new Apartamento("103", "Moisés", "Federico", 1, 1),
+        new Apartamento("401", "Eustaquio", "Zulia", 1, 2),
+        new Apartamento("402", "Sacarías", "Sacarías", 2, 1),
+        new Apartamento("403", "Mateo", "", 0, 0),
+        new Apartamento("501", "Marcos", "Gonzalo", 2, 1),
+        new Apartamento("502", "Jesús", "", 0, 0)
+      ];
+      alert("Se han cargado los datos predefinidos correctamente.");
+    } else if (opcion === '2') {
+      let continuar = true;
+      while (continuar) {
+        try {
+          const numero = prompt("Ingrese el número del apartamento:");
+          if (numero === null) break;
+          const dueno = prompt("Ingrese el nombre del dueño:");
+          const inquilino = prompt("Ingrese el nombre del inquilino (deje en blanco si está desocupado):");
+          let numAdultos = 0;
+          let numNinos = 0;
+
+          if (inquilino !== null && inquilino.trim() !== "") {
+            numAdultos = parseInt(prompt("Ingrese el número de adultos:"));
+            numNinos = parseInt(prompt("Ingrese el número de niños:"));
+            if (isNaN(numAdultos) || isNaN(numNinos)) {
+              throw new Error("Debe ingresar valores numéricos para adultos y niños.");
+            }
+          }
+
+          apartamentos.push(new Apartamento(numero, dueno, inquilino, numAdultos, numNinos));
+
+          if (!confirm("¿Desea agregar otro apartamento?")) {
+            continuar = false;
+          }
+        } catch (e) {
+          alert("Error al ingresar los datos: " + e.message);
+        }
+      }
+    } else {
+      alert("Opción no válida. Se cargarán los datos predefinidos.");
+      return crearDatosIniciales();
+    }
+    return apartamentos;
+  }
+
+  function calcularCostos(apartamentos) {
+    let detalle = "DETALLE DE CÁLCULOS:\n\n";
+
+    for (const apto of apartamentos) {
+      const estaOcupado = apto.inquilino !== null && apto.inquilino.trim() !== "";
+
+      detalle += `Apartamento: ${apto.numero}\n`;
+      detalle += `Dueño: ${apto.dueno}\n`;
+      detalle += `Inquilino: ${estaOcupado ? apto.inquilino : "Desocupado"}\n`;
+
+      if (estaOcupado) {
+        detalle += `Adultos: ${apto.numAdultos}\n`;
+        detalle += `Niños: ${apto.numNinos}\n\n`;
+
+        apto.costoPiscina = apto.numAdultos * COSTO_PISCINA_POR_ADULTO;
+        detalle += `Costo Piscina: $${apto.costoPiscina} (${apto.numAdultos} adultos x $${COSTO_PISCINA_POR_ADULTO})\n`;
+
+        if (apto.numNinos > 0) {
+          apto.costoJuegos = COSTO_JUEGOS;
+          detalle += `Costo Juegos: $${apto.costoJuegos} (hay ${apto.numNinos} niños)\n`;
+        } else {
+          apto.costoJuegos = 0;
+          detalle += `Costo Juegos: $0 (no hay niños)\n`;
+        }
+
+        apto.costoZonasSociales = COSTO_ZONAS_SOCIALES;
+        detalle += `Costo Zonas Sociales: $${apto.costoZonasSociales} (apartamento ocupado)\n`;
+
+        const piso = apto.numero.substring(0, 1);
+        if (piso === "1" || piso === "2") {
+          apto.costoAseo = COSTO_ASEO;
+          detalle += `Costo Aseo: $${apto.costoAseo} (piso ${piso})\n`;
+        } else {
+          apto.costoAseo = 0;
+          detalle += `Costo Aseo: $0 (no aplica para pisos superiores al 2)\n`;
+        }
+
+        const subtotal = apto.costoPiscina + apto.costoJuegos + apto.costoZonasSociales + apto.costoAseo;
+        apto.subtotal = subtotal;
+        detalle += `Subtotal: $${subtotal}\n`;
+
+        if (apto.dueno === apto.inquilino) {
+          apto.descuento = Math.floor(subtotal * PORCENTAJE_DESCUENTO);
+          detalle += `Descuento: $${apto.descuento} (${Math.floor(PORCENTAJE_DESCUENTO * 100)}% porque el dueño vive allí)\n`;
+        } else {
+          apto.descuento = 0;
+          detalle += `Descuento: $0 (no aplica)\n`;
+        }
+
+        apto.totalPagar = COSTO_FIJO + subtotal - apto.descuento;
+        detalle += `Total a Pagar: $${apto.totalPagar} (Costo fijo $${COSTO_FIJO} + Subtotal $${subtotal} - Descuento $${apto.descuento})\n`;
+      } else {
+        apto.costoPiscina = 0;
+        apto.costoJuegos = 0;
+        apto.costoZonasSociales = 0;
+        apto.costoAseo = 0;
+        apto.subtotal = 0;
+        apto.descuento = 0;
+        apto.totalPagar = COSTO_FIJO;
+
+        detalle += "El apartamento está desocupado.\n";
+        detalle += `Solo se cobra el costo fijo: $${COSTO_FIJO}\n`;
+        detalle += `Total a Pagar: $${apto.totalPagar}\n`;
+      }
+      detalle += "-----------------------------------\n\n";
+    }
+
+    if (confirm("¿Desea ver el detalle de los cálculos?")) {
+      const detalleDiv = document.createElement('div');
+      detalleDiv.innerHTML = `<pre>${detalle}</pre>`;
+      document.getElementById('resultados').appendChild(detalleDiv);
+    }
+    alert("Se han calculado los costos de administración correctamente.");
+  }
+
+  function mostrarResultados(apartamentos) {
+    let tablaHTML = "<table>";
+    tablaHTML += "<thead><tr><th>Apto</th><th>Dueño</th><th>Inquilino</th><th>Adultos</th><th>Niños</th><th>Piscina</th><th>Juegos</th><th>Zonas Sociales</th><th>Aseo</th><th>Subtotal</th><th>Descuento</th><th>Total Pagar</th></tr></thead>";
+    tablaHTML += "<tbody>";
+
+    for (const apto of apartamentos) {
+      tablaHTML += `<tr><td>${apto.numero}</td><td>${apto.dueno}</td><td>${apto.inquilino}</td><td>${apto.numAdultos}</td><td>${apto.numNinos}</td><td>${apto.costoPiscina}</td><td>${apto.costoJuegos}</td><td>${apto.costoZonasSociales}</td><td>${apto.costoAseo}</td><td>${apto.subtotal}</td><td>${apto.descuento}</td><td>${apto.totalPagar}</td></tr>`;
+    }
+
+    tablaHTML += "</tbody></table>";
+    document.getElementById('resultados').innerHTML = tablaHTML;
+  }
+
+  function main() {
+    alert("Bienvenido al Sistema de Administración del Condominio La 8 Vecindad");
+    crearDatosIniciales();
+
+    let salir = false;
+    while (!salir) {
+      const opcion = prompt("Seleccione una opción:\n1. Calcular Administración\n2. Mostrar Tabla de Datos\n3. Salir");
+
+      switch (opcion) {
+        case '1':
+          calcularCostos(apartamentos);
+          break;
+        case '2':
+          mostrarResultados(apartamentos);
+          break;
+        case '3':
+        case null:
+          salir = true;
+          alert("¡Gracias por utilizar el Sistema de Administración!");
+          break;
+        default:
+          alert("Opción no válida.");
+      }
+    }
+  }
+
+ 
+</script>
+
+</body>
+</html>
